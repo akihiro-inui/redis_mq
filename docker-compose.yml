@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  redis:
+    image: redis
+    container_name: "redis"
+    ports:
+      - "6739:6739"
+
+  worker:
+    build:
+      context: .
+    depends_on:
+      - redis
+    container_name: "worker"
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+    command: python src/scheduler/worker.py
+
+  api:
+    build:
+      context: .
+    container_name: "api"
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+    restart: always
+    ports:
+      - "5555:5555"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5555/status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
