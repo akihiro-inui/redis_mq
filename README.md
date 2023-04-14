@@ -91,7 +91,7 @@ docker-compose build && docker-compose up -d
 ### 5. Launch Worker
 `python src/executor/worker.py`
 
-Once the application is launched, you should be able to see the Swagger documentation of Web API at `localhost:5000`
+Once the application is launched, you should be able to see the Swagger documentation of Web API at `localhost:5555`
 ![alt text](assets/swagger.png "Swagger")
 
 
@@ -119,5 +119,5 @@ curl -X 'GET' \
 
 ### Get all jobs and their status
 ```
-curl -X 'GET' 'http://0.0.0.0:5000/jobs' -H 'accept: application/json'
+curl -X 'GET' 'http://0.0.0.0:5555/jobs' -H 'accept: application/json'
 ```
