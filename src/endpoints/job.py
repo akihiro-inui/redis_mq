@@ -17,16 +17,16 @@ router = APIRouter()
 
 
 @router.post("/enqueue_job")
-async def enqueue_job(input_array: QueuedValue) -> JSONResponse:
+async def enqueue_job(input_value: QueuedValue) -> JSONResponse:
     """
     Async function to enqueue the job to the message queue.
     and return the result to let client knows the job is queued.
-    :param input_array: Input unsorted integer array from the client
+    :param input_value: Input unsorted integer array from the client
     :return: Json response that contains the success status of queuing the job.
     """
     # Queue the job
     try:
-        result = MQ.enqueue_job(queue, CustomWorker.sort_array, input_array)
+        result = MQ.enqueue_job(queue, CustomWorker.sort_array, input_value)
         job_id = result.get_id()
         return JSONResponse(
             status_code=201,
@@ -45,12 +45,12 @@ async def enqueue_job(input_array: QueuedValue) -> JSONResponse:
         )
 
 
-@router.post("/enqueue_dependent_jobs")
-async def enqueue_job(input_array: QueuedValue) -> JSONResponse:
+@router.post("/enqueue_multiple_jobs")
+async def enqueue_job(input_value: QueuedValue) -> JSONResponse:
     """
     Async function to enqueue the job to the message queue.
     and return the result to let client knows the job is queued.
-    :param input_array: Input unsorted integer array from the client
+    :param input_value: Input unsorted integer array from the client
     :return: Json response that contains the success status of queuing the job.
     """
     # Queue the job
@@ -58,7 +58,7 @@ async def enqueue_job(input_array: QueuedValue) -> JSONResponse:
         result = MQ.enqueue_dependent_jobs(queue,
                                            CustomWorker.sort_array,
                                            CustomWorker.take_first_value_from_array,
-                                           input_array.array)
+                                           input_value.array)
         job_id = result.get_id()
         return JSONResponse(
             status_code=201,

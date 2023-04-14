@@ -49,8 +49,8 @@ Worker takes the input array from the queue, run the sorting function and return
     ├── endpoionts
     │   ├── docs.py
     │   ├── status.py
-    │   └── scheduler.py
-    ├── scheduler
+    │   └── job.py
+    ├── executor
     │   ├── __init__.py
     │   ├── message_queue.py
     │   └── worker.py
@@ -61,8 +61,9 @@ Worker takes the input array from the queue, run the sorting function and return
     └── tests
         ├── endpoints
         │   ├── test_docs.py   
+        │   ├── test_job.py   
         │   └── test_status.py
-        └── scheduler
+        └── executor
             ├── test_worker.py   
             └── test_message_queue.py
 ```
@@ -88,7 +89,7 @@ docker-compose build && docker-compose up -d
 `python src/main.py`
 
 ### 5. Launch Worker
-`python src/scheduler/worker.py`
+`python src/executor/worker.py`
 
 Once the application is launched, you should be able to see the Swagger documentation of Web API at `localhost:5000`
 ![alt text](assets/swagger.png "Swagger")
@@ -99,7 +100,7 @@ After launching the application followed by the guide above, you can query APIs.
 ### Enqueue a job
 ```
 curl -X 'POST' \
-  'http://0.0.0.0:5000/register_job' \
+  'http://0.0.0.0:5555/enqueue_job' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -112,7 +113,7 @@ curl -X 'POST' \
 ### Get a job status by ID
 ```
 curl -X 'GET' \
-  'http://0.0.0.0:5000/jobs/e5bcb6c2-692c-44a5-b1a1-d714c2c6ad7a' \
+  'http://0.0.0.0:5555/jobs/e5bcb6c2-692c-44a5-b1a1-d714c2c6ad7a' \
   -H 'accept: application/json'
 ```
 
