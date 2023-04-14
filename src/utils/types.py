@@ -2,5 +2,5 @@ from pydantic import BaseModel
 from typing import List
 
 
-class RegisterJobRequest(BaseModel):
+class QueuedValue(BaseModel):
     array: List[int]

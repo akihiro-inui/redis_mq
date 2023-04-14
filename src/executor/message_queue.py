@@ -6,6 +6,7 @@ sys.path.insert(0, os.getcwd())
 from redis import Redis
 from rq import Queue, Retry
 from typing import List
+from src.utils.types import QueuedValue
 
 
 class MessageQueue:
@@ -25,18 +26,36 @@ class MessageQueue:
         return Queue(connection=self.get_connection(), name=name)
 
     @staticmethod
-    def enqueue_job(queue: Queue, task_function, input_value: List[int]):
+    def enqueue_job(queue: Queue, task_function, input_value: QueuedValue):
         """
         Given queue, input value and task function, enqueue the job.
         Retry 3 times with 60 seconds interval if it fails.
         :param queue: Queue class with name
-        :param: task_function: Function (job)
+        :param: task_function: Function (job) to be executed
         :param input_value: Input value
         :return: Result of the queueing task
         """
         return queue.enqueue(
-            task_function, input_value, retry=Retry(max=3, interval=60)
+            task_function, input_value.array, retry=Retry(max=3, interval=60)
         )
+
+    @staticmethod
+    def enqueue_dependent_jobs(queue: Queue,
+                              first_task_function,
+                              second_task_function,
+                              input_value: List[int]):
+        """
+        Given queue, enqueue the jobs with input value.
+        Retry 3 times with 60 seconds interval if it fails.
+        :param queue: Queue class with name
+        :param first_task_function: First function (job) to be executed
+        :param second_task_function: Second function (job) to be executed
+        :param input_value: Input value
+        :return: Result of the queueing jobs
+        """
+        fist_job = queue.enqueue(first_task_function, input_value, retry=Retry(max=3, interval=60))
+        second_job = queue.enqueue(second_task_function, depends_on=fist_job, retry=Retry(max=3, interval=60))
+        return second_job
 
     @staticmethod
     def get_job_status(queue: Queue, job_id: str):

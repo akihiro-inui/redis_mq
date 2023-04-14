@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.getcwd())
 
-from src.scheduler.message_queue import MessageQueue
+from src.executor.message_queue import MessageQueue
 
 # Instantiate Message Queue and create a queue
 MQ = MessageQueue()

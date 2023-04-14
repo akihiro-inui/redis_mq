@@ -16,7 +16,7 @@ services:
     environment:
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
-    command: python src/scheduler/worker.py
+    command: python src/executor/worker.py
 
   api:
     build:

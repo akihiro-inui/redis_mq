@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.utils.common_logger import logger
 from src.utils.custom_error_handlers import BaseError
-from src.endpoints import status, docs, scheduler
+from src.endpoints import status, docs, job
 
 # Create Web API Application
 app = FastAPI()
@@ -28,7 +28,7 @@ def validation_exception_handler(request: Request, err: BaseError) -> JSONRespon
 # Add endpoints
 app.include_router(docs.router)
 app.include_router(status.router)
-app.include_router(scheduler.router)
+app.include_router(job.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,4 +40,4 @@ app.add_middleware(
 
 if __name__ == "__main__":
     # Run FastAPI
-    uvicorn.run("main:app", host="0.0.0.0", port=5000, log_level="info", reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=5555, log_level="info", reload=True)

@@ -8,16 +8,16 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from datetime import datetime
 from src.utils.custom_error_handlers import RedisError
-from src.utils.types import RegisterJobRequest
-from src.scheduler.worker import CustomWorker
-from src.scheduler import MQ, queue
+from src.utils.types import QueuedValue
+from src.executor.worker import CustomWorker
+from src.executor import MQ, queue
 
 
 router = APIRouter()
 
 
-@router.post("/register_job")
-async def register_job(input_array: RegisterJobRequest) -> JSONResponse:
+@router.post("/enqueue_job")
+async def enqueue_job(input_array: QueuedValue) -> JSONResponse:
     """
     Async function to enqueue the job to the message queue.
     and return the result to let client knows the job is queued.
@@ -26,7 +26,7 @@ async def register_job(input_array: RegisterJobRequest) -> JSONResponse:
     """
     # Queue the job
     try:
-        result = MQ.enqueue_job(queue, CustomWorker.create_job, input_array)
+        result = MQ.enqueue_job(queue, CustomWorker.sort_array, input_array)
         job_id = result.get_id()
         return JSONResponse(
             status_code=201,
@@ -44,6 +44,37 @@ async def register_job(input_array: RegisterJobRequest) -> JSONResponse:
             message="Failed to enqueued the job. Check Redis is running and ready to accept the connection",
         )
 
+
+@router.post("/enqueue_dependent_jobs")
+async def enqueue_job(input_array: QueuedValue) -> JSONResponse:
+    """
+    Async function to enqueue the job to the message queue.
+    and return the result to let client knows the job is queued.
+    :param input_array: Input unsorted integer array from the client
+    :return: Json response that contains the success status of queuing the job.
+    """
+    # Queue the job
+    try:
+        result = MQ.enqueue_dependent_jobs(queue,
+                                           CustomWorker.sort_array,
+                                           CustomWorker.take_first_value_from_array,
+                                           input_array.array)
+        job_id = result.get_id()
+        return JSONResponse(
+            status_code=201,
+            content=dict(
+                status="OK",
+                message="Successfully enqueued the job",
+                job_id=job_id,
+            ),
+        )
+
+    # Thrown an error if connection to Redis fails
+    except exceptions.ConnectionError:
+        raise RedisError(
+            status_code=500,
+            message="Failed to enqueued the job. Check Redis is running and ready to accept the connection",
+        )
 
 @router.get("/jobs/{job_id}")
 def get_job_status(job_id: str) -> JSONResponse:
